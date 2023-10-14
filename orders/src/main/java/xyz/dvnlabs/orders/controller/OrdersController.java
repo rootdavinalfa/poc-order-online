@@ -1,5 +1,6 @@
 package xyz.dvnlabs.orders.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -34,7 +35,7 @@ public class OrdersController {
     @PostMapping
     public void createOrder(
             @RequestBody Orders orders
-    ) {
+    ) throws JsonProcessingException {
         ordersService.createOrders(orders);
     }
 

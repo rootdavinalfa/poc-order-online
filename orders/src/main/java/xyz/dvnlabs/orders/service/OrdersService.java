@@ -1,29 +1,42 @@
 package xyz.dvnlabs.orders.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import xyz.dvnlabs.orders.dto.CustomerDTO;
+import xyz.dvnlabs.orders.dto.PaymentDTO;
 import xyz.dvnlabs.orders.entity.Orders;
 import xyz.dvnlabs.orders.repository.OrdersRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.concurrent.CompletableFuture;
 
 @Service
+@Slf4j
 public class OrdersService {
     private static final String SERVICE_ID_NAME = "ORDER_REFERENCES";
 
 
     private final RestTemplate restTemplate;
     private final OrdersRepository ordersRepository;
+    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public OrdersService(RestTemplate restTemplate, OrdersRepository ordersRepository) {
+    public OrdersService(RestTemplate restTemplate, OrdersRepository ordersRepository,
+                         ObjectMapper objectMapper, KafkaTemplate<String, String> kafkaTemplate) {
         this.restTemplate = restTemplate;
         this.ordersRepository = ordersRepository;
+        this.objectMapper = objectMapper;
+        this.kafkaTemplate = kafkaTemplate;
     }
 
     public Page<Orders> getOrderPage(
@@ -79,10 +92,21 @@ public class OrdersService {
     @Transactional(
             rollbackFor = RuntimeException.class
     )
-    public void createOrders(Orders orders) {
+    public void createOrders(Orders orders) throws JsonProcessingException {
         orders.setTrxStatus("0");
-        save(orders);
-        // TODO: Publish to kafka
+        orders = save(orders);
+
+        PaymentDTO paymentDTO = new PaymentDTO();
+        paymentDTO.setOrderID(orders.getId());
+        String jsonPayment = objectMapper.writeValueAsString(paymentDTO);
+        CompletableFuture<SendResult<String, String>> future =
+                kafkaTemplate.send("orders_to_payment", jsonPayment);
+
+        future.whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Unable to send message " + jsonPayment + " , Error: " + ex.getMessage());
+            }
+        });
     }
 
 }

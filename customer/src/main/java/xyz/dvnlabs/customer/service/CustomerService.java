@@ -20,7 +20,7 @@ public class CustomerService {
     @Transactional(rollbackFor = RuntimeException.class)
     public Customer save(Customer customer) {
         if (customer.getId() != null && customerRepository.existsById(customer.getId())) {
-            throw new ResourceNotFoundException(SERVICE_ID_NAME + " is exist");
+            throw new ResourceExistException(SERVICE_ID_NAME + " is exist");
         }
 
         return customerRepository.save(customer);
@@ -29,7 +29,7 @@ public class CustomerService {
     @Transactional(rollbackFor = RuntimeException.class)
     public Customer update(Customer customer) {
         if (!customerRepository.existsById(customer.getId())) {
-            throw new ResourceExistException(SERVICE_ID_NAME + " not found!");
+            throw new ResourceNotFoundException(SERVICE_ID_NAME + " not found!");
         }
 
         return customerRepository.save(customer);

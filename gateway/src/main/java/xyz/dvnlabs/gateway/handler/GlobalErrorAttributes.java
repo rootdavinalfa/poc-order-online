@@ -16,10 +16,10 @@ public class GlobalErrorAttributes extends DefaultErrorAttributes {
 
     @Override
     public Map<String, Object> getErrorAttributes(ServerRequest request, ErrorAttributeOptions options) {
-        Throwable error = super.getError(request);
+        Throwable error = getError(request);
         Map<String, Object> map = new java.util.HashMap<>(Map.of(
                 "message", error.getMessage(),
-                "errorCode", HttpStatus.BAD_REQUEST.value(),
+                "errorCode", HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "timeStamp", LocalDateTime.now()
         ));
 
