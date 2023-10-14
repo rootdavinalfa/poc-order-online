@@ -1,0 +1,9 @@
+rootProject.name = 'order-online'
+include(
+        'customer',
+        'gateway',
+        'merchant',
+        'orders',
+        'payment',
+        'registry'
+)
