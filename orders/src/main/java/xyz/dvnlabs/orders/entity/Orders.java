@@ -21,7 +21,7 @@ public class Orders {
     @Column(name = "ORDER_REFERENCES")
     private Long id;
 
-    @Column(name = "TRX_DATE")
+    @Column(name = "TRX_DATE",columnDefinition = "TIMESTAMP")
     private LocalDateTime trxDate;
 
     @Column(name = "TRX_AMOUNT", precision = 23, scale = 5)

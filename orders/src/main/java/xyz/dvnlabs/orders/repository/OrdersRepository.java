@@ -5,9 +5,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Repository;
 import xyz.dvnlabs.orders.entity.Orders;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Repository
@@ -17,8 +19,8 @@ public interface OrdersRepository extends JpaRepository<Orders, Long> {
             "WHERE trx_date BETWEEN :dateFrom AND :dateTo ", nativeQuery = true)
     Page<Orders> getOrderWithQuery(
             Pageable pageable,
-            @Param("dateFrom") LocalDateTime dateFrom,
-            @Param("dateTo") LocalDateTime dateTo
+            @Param("dateFrom") LocalDate dateFrom,
+            @Param("dateTo") LocalDate dateTo
     );
 
 }

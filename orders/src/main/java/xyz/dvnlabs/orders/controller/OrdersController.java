@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import xyz.dvnlabs.orders.entity.Orders;
 import xyz.dvnlabs.orders.service.OrdersService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -22,17 +23,17 @@ public class OrdersController {
     public Page<Orders> getOrdersPage(
             Pageable pageable,
             @DateTimeFormat(pattern = "yyyy-MM-dd")
-            @RequestParam(required = false) LocalDateTime dateFrom,
+            @RequestParam(required = false) LocalDate dateFrom,
             @DateTimeFormat(pattern = "yyyy-MM-dd")
-            @RequestParam(required = false) LocalDateTime dateTo
+            @RequestParam(required = false) LocalDate dateTo
     ) {
 
         return ordersService.getOrderPage(pageable, dateFrom, dateTo);
     }
 
-    @PostMapping("/")
+    @PostMapping
     public void createOrder(
-            Orders orders
+            @RequestBody Orders orders
     ) {
         ordersService.createOrders(orders);
     }
