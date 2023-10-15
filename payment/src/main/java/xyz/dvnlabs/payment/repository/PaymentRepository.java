@@ -11,7 +11,7 @@ import xyz.dvnlabs.payment.entity.Payment;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     @Query(value = "SELECT * FROM payment",nativeQuery = true)
-    public Page<Payment> getPaymentWithQuery(
+    Page<Payment> getPaymentWithQuery(
             Pageable pageable
     );
 

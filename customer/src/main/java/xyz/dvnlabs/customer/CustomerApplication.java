@@ -3,6 +3,7 @@ package xyz.dvnlabs.customer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.kafka.annotation.EnableKafka;
 
 
 @SpringBootApplication(
@@ -11,6 +12,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 				"xyx.dvnlabs.corelib"
 		}
 )
+@EnableKafka
 @EnableDiscoveryClient
 public class CustomerApplication {
 

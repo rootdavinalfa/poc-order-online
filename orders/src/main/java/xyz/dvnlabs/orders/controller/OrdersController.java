@@ -9,7 +9,6 @@ import xyz.dvnlabs.orders.entity.Orders;
 import xyz.dvnlabs.orders.service.OrdersService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/orders")
@@ -30,6 +29,13 @@ public class OrdersController {
     ) {
 
         return ordersService.getOrderPage(pageable, dateFrom, dateTo);
+    }
+
+    @GetMapping("/{id}")
+    public Orders findById(
+            @PathVariable Long id
+    ) {
+        return ordersService.findById(id);
     }
 
     @PostMapping

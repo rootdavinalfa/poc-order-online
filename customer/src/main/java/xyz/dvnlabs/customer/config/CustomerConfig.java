@@ -1,4 +1,4 @@
-package xyz.dvnlabs.payment.config;
+package xyz.dvnlabs.customer.config;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class PaymentConfig {
+public class CustomerConfig {
 
 
     @Value(value = "${spring.kafka.bootstrap-servers}")
@@ -27,18 +27,8 @@ public class PaymentConfig {
     }
 
     @Bean
-    public NewTopic ordersToPayment() {
-        return new NewTopic("payment_to_orders", 1, (short) 1);
-    }
-
-    @Bean
-    public NewTopic paymentToCustomer() {
-        return new NewTopic("payment_to_customer", 1, (short) 1);
-    }
-
-    @Bean
-    public NewTopic paymentToOrders() {
-        return new NewTopic("payment_to_orders", 1, (short) 1);
+    public NewTopic customerToPayment() {
+        return new NewTopic("customer_to_payment", 1, (short) 1);
     }
 
 

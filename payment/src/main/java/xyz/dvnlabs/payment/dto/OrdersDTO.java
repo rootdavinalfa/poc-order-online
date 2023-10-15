@@ -1,12 +1,10 @@
-package xyz.dvnlabs.orders.entity;
+package xyz.dvnlabs.payment.dto;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 
 @Getter
@@ -14,34 +12,15 @@ import java.time.LocalDateTime;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity(name = "ORDERS")
-public class Orders {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ORDER_REFERENCES")
+public class OrdersDTO {
     private Long id;
-
-    @Column(name = "TRX_DATE",columnDefinition = "TIMESTAMP")
     private LocalDateTime trxDate;
-
-    @Column(name = "TRX_AMOUNT", precision = 23, scale = 5)
     @Digits(integer = 18, fraction = 5, message = "TRX AMOUNT must ({integer},{fraction})")
     private BigDecimal trxAmount;
-
-    @Column(name = "CUSTOMER_ID")
     private Long customerID;
-
-    @Transient
     private String customerName;
-
-    @Column(name = "MERCHANT_ID")
     private String merchantID;
-
-    @Transient
     private String merchantName;
-
-
-
     /**
      * Trx Status
      * <p>
@@ -49,11 +28,8 @@ public class Orders {
      * 1 = SUCCESS
      * 2 = REJECTED REQUEST
      */
-    @Column(name = "TRX_STATUS", length = 1)
     @Size(max = 1, min = 1, message = "TRX STATUS max {max} min {min}")
     private String trxStatus;
-
-    @Column(name = "TRX_REMARK", columnDefinition = "text")
     private String trxRemark;
 
 }

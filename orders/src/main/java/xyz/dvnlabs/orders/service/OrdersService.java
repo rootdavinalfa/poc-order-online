@@ -3,6 +3,7 @@ package xyz.dvnlabs.orders.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -31,19 +32,14 @@ public class OrdersService {
     private final ObjectMapper objectMapper;
     private final KafkaTemplate<String, String> kafkaTemplate;
 
-    public OrdersService(RestTemplate restTemplate, OrdersRepository ordersRepository,
-                         ObjectMapper objectMapper, KafkaTemplate<String, String> kafkaTemplate) {
+    public OrdersService(RestTemplate restTemplate, OrdersRepository ordersRepository, ObjectMapper objectMapper, KafkaTemplate<String, String> kafkaTemplate) {
         this.restTemplate = restTemplate;
         this.ordersRepository = ordersRepository;
         this.objectMapper = objectMapper;
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public Page<Orders> getOrderPage(
-            Pageable pageable,
-            LocalDate dateFrom,
-            LocalDate dateTo
-    ) {
+    public Page<Orders> getOrderPage(Pageable pageable, LocalDate dateFrom, LocalDate dateTo) {
 
         if (dateFrom == null) {
             dateFrom = LocalDate.now();
@@ -54,20 +50,16 @@ public class OrdersService {
         }
 
 
-        return ordersRepository.getOrderWithQuery(
-                pageable, dateFrom, dateTo).map(orders -> {
-                    try {
-                        CustomerDTO customerDTO = restTemplate
-                                .getForObject("http://CUSTOMER/customer/" + orders.getCustomerID(),
-                                        CustomerDTO.class);
-                        orders.setCustomerName(customerDTO != null ? customerDTO.getCustomerName() : "Customer");
-                    } catch (RestClientException exception) {
-                        exception.printStackTrace();
-                    }
+        return ordersRepository.getOrderWithQuery(pageable, dateFrom, dateTo).map(orders -> {
+            try {
+                CustomerDTO customerDTO = restTemplate.getForObject("http://CUSTOMER/customer/" + orders.getCustomerID(), CustomerDTO.class);
+                orders.setCustomerName(customerDTO != null ? customerDTO.getCustomerName() : "Customer");
+            } catch (RestClientException exception) {
+                exception.printStackTrace();
+            }
 
-                    return orders;
-                }
-        );
+            return orders;
+        });
 
     }
 
@@ -89,9 +81,7 @@ public class OrdersService {
         return ordersRepository.save(orders);
     }
 
-    @Transactional(
-            rollbackFor = RuntimeException.class
-    )
+    @Transactional(rollbackFor = RuntimeException.class)
     public void createOrders(Orders orders) throws JsonProcessingException {
         orders.setTrxStatus("0");
         orders = save(orders);
@@ -99,14 +89,18 @@ public class OrdersService {
         PaymentDTO paymentDTO = new PaymentDTO();
         paymentDTO.setOrderID(orders.getId());
         String jsonPayment = objectMapper.writeValueAsString(paymentDTO);
-        CompletableFuture<SendResult<String, String>> future =
-                kafkaTemplate.send("orders_to_payment", jsonPayment);
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("orders_to_payment", jsonPayment);
 
         future.whenComplete((result, ex) -> {
             if (ex != null) {
                 log.error("Unable to send message " + jsonPayment + " , Error: " + ex.getMessage());
             }
         });
+    }
+
+    public Orders findById(Long id) {
+        return ordersRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Orders not found!"));
     }
 
 }

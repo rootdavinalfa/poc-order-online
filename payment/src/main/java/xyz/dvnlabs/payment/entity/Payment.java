@@ -21,10 +21,10 @@ public class Payment {
     @Column(name = "ORDER_ID")
     private Long orderID;
 
-    @Column(name = "PAID_ON")
+    @Column(name = "PAID_ON", columnDefinition = "TIMESTAMP")
     private LocalDateTime paidOn;
 
-    @Column(name = "REQUESTED_ON")
+    @Column(name = "REQUESTED_ON", columnDefinition = "TIMESTAMP")
     private LocalDateTime requestedOn;
 
     /**
