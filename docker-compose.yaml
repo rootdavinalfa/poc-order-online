@@ -1,0 +1,80 @@
+version: "3"
+services:
+  mysql:
+    extends:
+      file: docker/tools/mysql.yaml
+      service: db
+    networks:
+      - order_online
+  kafka:
+    extends:
+      file: docker/tools/kafka.yaml
+      service: kafka
+    networks:
+      - order_online
+  customer:
+    build:
+      dockerfile: docker/Customer.dockerFile
+      context: .
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://registry:9090/config"
+    networks:
+      - order_online
+  gateway:
+    build:
+      dockerfile: docker/Gateway.dockerFile
+      context: .
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://registry:9090/config"
+    ports:
+      - "8080:8080"
+    networks:
+      - order_online
+  merchant:
+    build:
+      dockerfile: docker/Merchant.dockerFile
+      context: .
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://registry:9090/config"
+    networks:
+      - order_online
+  orders:
+    build:
+      dockerfile: docker/Orders.dockerFile
+      context: .
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://registry:9090/config"
+    networks:
+      - order_online
+  payment:
+    build:
+      dockerfile: docker/Payment.dockerFile
+      context: .
+    environment:
+      SPRING_CONFIG_IMPORT: "configserver:http://registry:9090/config"
+    networks:
+      - order_online
+  registry:
+    build:
+      dockerfile: docker/Registry.dockerFile
+      context: .
+    environment:
+      SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS: file:///app/config-repo/
+      EUREKA_CLIENT_SERVICE_URL_DEFAULT_ZONE: http://registry:9090/eureka/
+
+    ports:
+      - "9090:9090"
+    volumes:
+      - "/mnt/c/Users/davin/Project/order-online/config-repo/:/app/config-repo/"
+    networks:
+      - order_online
+
+
+networks:
+  order_online:
+    driver: bridge
+volumes:
+  kafka_data:
+    driver: local
+  mysql_data:
+    driver: local

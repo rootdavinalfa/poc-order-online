@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "72351ba9-1d23-4fca-a900-23e44f4f3673",
+		"name": "Order Online",
+		"description": "OpenAPI spec for POC order online API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6445831",
+		"_collection_link": "https://www.postman.com/rootdavinalfa/workspace/public/collection/6445831-72351ba9-1d23-4fca-a900-23e44f4f3673?action=share&source=collection_link&creator=6445831"
+	},
+	"item": [
+		{
+			"name": "Orders",
+			"item": [
+				{
+					"name": "Get Page Order",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orders/page?sort=trx_date,desc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders",
+								"page"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "trx_date,desc"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"trxAmount\": 200000,\r\n    \"customerID\": 1,\r\n    \"merchantID\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Order By id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/orders/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"orders",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Customer",
+			"item": [
+				{
+					"name": "Get Customer By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/customer/{{id}}",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"customer",
+								"{{id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Customer",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"customerName\": \"Test\",\r\n    \"balance\": 1000000000\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/customer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"customer"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Customer Need To Pay",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/customer/ack/page?customerID=1&sort=created_on,desc&customerAck=0",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"customer",
+								"ack",
+								"page"
+							],
+							"query": [
+								{
+									"key": "customerID",
+									"value": "1"
+								},
+								{
+									"key": "sort",
+									"value": "created_on,desc"
+								},
+								{
+									"key": "customerAck",
+									"value": "0",
+									"description": "0 = Not approved/not acknowledge , 1=Approved / Acknowledge"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pay",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"customerID\" : 1,\r\n    \"paymentID\" : 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/customer/pay",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"customer",
+								"pay"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "Get Page Payment",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/payment/page?sort=requested_on,desc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"payment",
+								"page"
+							],
+							"query": [
+								{
+									"key": "sort",
+									"value": "requested_on,desc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Merchant",
+			"item": [
+				{
+					"name": "Get Merchant Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/merchant/page",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"merchant",
+								"page"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Merchant",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"merchantName\" : \"Suka Suka Collection\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/merchant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"merchant"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant By Id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/merchant/1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"merchant",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Merchant Orders Page",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/merchant/merchant-orders/page",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"merchant",
+								"merchant-orders",
+								"page"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "id",
+			"value": "1"
+		}
+	]
+}
