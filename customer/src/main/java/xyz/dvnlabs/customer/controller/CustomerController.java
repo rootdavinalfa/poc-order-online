@@ -42,10 +42,11 @@ public class CustomerController {
     @GetMapping("/ack/page")
     public Page<CustomerPaymentHistory> getPage(
             Pageable pageable,
-            @RequestParam String customerID
+            @RequestParam String customerID,
+            @RequestParam(defaultValue = "") String customerAck
     ) {
         return customerService.getPagePaymentHistory(
-                pageable, customerID);
+                pageable, customerID, customerAck);
     }
 
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.KafkaException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -98,10 +97,11 @@ public class CustomerService {
 
     public Page<CustomerPaymentHistory> getPagePaymentHistory(
             Pageable pageable,
-            String customerID
+            String customerID,
+            String customerAck
     ) {
         return customerPaymentHistoryRepository.getPageWithQuery(
-                pageable, customerID).map(customerPaymentHistory -> {
+                pageable, customerID, customerAck).map(customerPaymentHistory -> {
             try {
                 OrdersDTO ordersDTO = restTemplate
                         .getForObject("http://ORDERS/orders/" + customerPaymentHistory.getOrdersID(),
@@ -152,6 +152,11 @@ public class CustomerService {
                         payDTO.customerID(),
                         payDTO.paymentID()
                 ).orElseThrow(() -> new ResourceNotFoundException(SERVICE_HISTORY + " is not found"));
+
+        if (customerPaymentHistory.getCustomerAck().equals("1")) {
+            throw new ResourceExistException(SERVICE_HISTORY + " is already paid");
+        }
+
         customerPaymentHistory.setCustomerAck("1");
         Customer customer = findById(payDTO.customerID());
 

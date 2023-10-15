@@ -13,10 +13,13 @@ import java.util.Optional;
 @Repository
 public interface CustomerPaymentHistoryRepository extends JpaRepository<CustomerPaymentHistory, Long> {
 
-    @Query(value = "SELECT * FROM customer_payment_history", nativeQuery = true)
+    @Query(value = "SELECT * FROM customer_payment_history " +
+            "WHERE customer_ack = COALESCE(NULLIF(:customerAck,''),customer_ack) " +
+            "AND customer_id = :customerID", nativeQuery = true)
     Page<CustomerPaymentHistory> getPageWithQuery(
             Pageable pageable,
-            @Param("customerID") String customerID
+            @Param("customerID") String customerID,
+            @Param("customerAck") String customerAck
     );
 
     @Query(value = "SELECT DISTINCT * FROM customer_payment_history " +
