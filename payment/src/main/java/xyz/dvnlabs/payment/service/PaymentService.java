@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import xyz.dvnlabs.corelib.exception.ResourceExistException;
 import xyz.dvnlabs.corelib.exception.ResourceNotFoundException;
 import xyz.dvnlabs.payment.dto.OrdersDTO;
+import xyz.dvnlabs.payment.dto.OrdersValidDTO;
 import xyz.dvnlabs.payment.dto.PaymentCustomerDTO;
 import xyz.dvnlabs.payment.entity.Payment;
 import xyz.dvnlabs.payment.repository.PaymentRepository;
@@ -81,7 +82,7 @@ public class PaymentService {
                 .getForObject("http://ORDERS/orders/" + payment.getOrderID(),
                         OrdersDTO.class);
 
-        if (ordersDTO == null){
+        if (ordersDTO == null) {
             throw new ResourceNotFoundException("Orders not found");
         }
 
@@ -124,6 +125,23 @@ public class PaymentService {
         payment.setPaymentStatus(paymentCustomerDTO.getPaymentStatus());
         // Update payment
         update(payment);
+
+        OrdersValidDTO ordersValidDTO = new OrdersValidDTO(
+                payment.getOrderID(),
+                "1",
+                "PAID on " + paymentCustomerDTO.getPaidOn().toString()
+        );
+
+        String jsonOrdersValid = objectMapper.writeValueAsString(ordersValidDTO);
+        CompletableFuture<SendResult<String, String>> future =
+                kafkaTemplate.send("payment_to_orders", jsonOrdersValid);
+
+        future.whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Unable to send message " + jsonOrdersValid + " , Error: " + ex.getMessage());
+            }
+        });
+
 
     }
 

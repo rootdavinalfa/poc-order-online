@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.errors.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import xyz.dvnlabs.orders.dto.CustomerDTO;
+import xyz.dvnlabs.orders.dto.OrdersValidDTO;
 import xyz.dvnlabs.orders.dto.PaymentDTO;
 import xyz.dvnlabs.orders.entity.Orders;
 import xyz.dvnlabs.orders.repository.OrdersRepository;
@@ -102,5 +104,19 @@ public class OrdersService {
         return ordersRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Orders not found!"));
     }
+
+    @KafkaListener(topics = "payment_to_orders", groupId = "orders")
+    @Transactional(rollbackFor = RuntimeException.class)
+    public void subscribePaymentToOrders(String payload) throws JsonProcessingException {
+        log.info("Received message: " + payload);
+        OrdersValidDTO ordersValidDTO = objectMapper
+                .readValue(payload, OrdersValidDTO.class);
+
+        Orders orders = findById(ordersValidDTO.id());
+        orders.setTrxStatus(ordersValidDTO.trxStatus());
+        orders.setTrxRemark(ordersValidDTO.trxRemark());
+        update(orders);
+    }
+
 
 }

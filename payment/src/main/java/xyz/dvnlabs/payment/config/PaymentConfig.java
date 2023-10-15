@@ -27,11 +27,6 @@ public class PaymentConfig {
     }
 
     @Bean
-    public NewTopic ordersToPayment() {
-        return new NewTopic("payment_to_orders", 1, (short) 1);
-    }
-
-    @Bean
     public NewTopic paymentToCustomer() {
         return new NewTopic("payment_to_customer", 1, (short) 1);
     }
