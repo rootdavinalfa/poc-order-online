@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import xyz.dvnlabs.orders.dto.CustomerDTO;
+import xyz.dvnlabs.orders.dto.MerchantDTO;
 import xyz.dvnlabs.orders.dto.OrdersValidDTO;
 import xyz.dvnlabs.orders.dto.PaymentDTO;
 import xyz.dvnlabs.orders.entity.Orders;
@@ -53,9 +54,19 @@ public class OrdersService {
 
 
         return ordersRepository.getOrderWithQuery(pageable, dateFrom, dateTo).map(orders -> {
+            // Get Customer Name
             try {
                 CustomerDTO customerDTO = restTemplate.getForObject("http://CUSTOMER/customer/" + orders.getCustomerID(), CustomerDTO.class);
                 orders.setCustomerName(customerDTO != null ? customerDTO.getCustomerName() : "Customer");
+            } catch (RestClientException exception) {
+                exception.printStackTrace();
+            }
+
+            // Get Merchant Name
+            try {
+                MerchantDTO merchantDTO =
+                        restTemplate.getForObject("http://MERCHANT/merchant/" + orders.getMerchantID(), MerchantDTO.class);
+                orders.setMerchantName(merchantDTO != null ? merchantDTO.getMerchantName() : "Merchant");
             } catch (RestClientException exception) {
                 exception.printStackTrace();
             }
@@ -102,6 +113,24 @@ public class OrdersService {
 
     public Orders findById(Long id) {
         return ordersRepository.findById(id)
+                .map(orders -> {
+                    try {
+                        CustomerDTO customerDTO = restTemplate.getForObject("http://CUSTOMER/customer/" + orders.getCustomerID(), CustomerDTO.class);
+                        orders.setCustomerName(customerDTO != null ? customerDTO.getCustomerName() : "Customer");
+                    } catch (RestClientException exception) {
+                        exception.printStackTrace();
+                    }
+
+                    // Get Merchant Name
+                    try {
+                        MerchantDTO merchantDTO =
+                                restTemplate.getForObject("http://MERCHANT/merchant/" + orders.getMerchantID(), MerchantDTO.class);
+                        orders.setMerchantName(merchantDTO != null ? merchantDTO.getMerchantName() : "Merchant");
+                    } catch (RestClientException exception) {
+                        exception.printStackTrace();
+                    }
+                    return orders;
+                })
                 .orElseThrow(() -> new ResourceNotFoundException("Orders not found!"));
     }
 
@@ -115,7 +144,17 @@ public class OrdersService {
         Orders orders = findById(ordersValidDTO.id());
         orders.setTrxStatus(ordersValidDTO.trxStatus());
         orders.setTrxRemark(ordersValidDTO.trxRemark());
-        update(orders);
+        orders = update(orders);
+
+        String jsonOrders = objectMapper.writeValueAsString(orders);
+        CompletableFuture<SendResult<String, String>> future = kafkaTemplate.send("orders_to_merchant", jsonOrders);
+
+        future.whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Unable to send message " + jsonOrders + " , Error: " + ex.getMessage());
+            }
+        });
+
     }
 
 

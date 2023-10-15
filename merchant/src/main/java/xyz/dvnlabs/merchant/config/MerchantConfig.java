@@ -1,4 +1,4 @@
-package xyz.dvnlabs.orders.config;
+package xyz.dvnlabs.merchant.config;
 
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
-public class OrdersConfig {
+public class MerchantConfig {
 
 
     @Value(value = "${spring.kafka.bootstrap-servers}")
@@ -27,19 +27,8 @@ public class OrdersConfig {
     }
 
     @Bean
-    public NewTopic ordersToPayment() {
-        return new NewTopic("orders_to_payment", 1, (short) 1);
-    }
-
-    @Bean
-    public NewTopic ordersToMerchant() {
-        return new NewTopic("orders_to_merchant", 1, (short) 1);
-    }
-
-
-    @Bean
     @LoadBalanced
-    public RestTemplate restTemplate(){
+    public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 }
